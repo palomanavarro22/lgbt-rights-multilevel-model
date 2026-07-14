@@ -14,6 +14,8 @@ The European Commission's 2019 Eurobarometer survey found support for equal righ
 - **Country level:** V-Dem dataset (Maerz et al., 2025), filtered to 2019, providing measures of LGBT political power, freedom of expression, polarisation, online hate speech, educational equality, and GDP per capita.
 - Countries matched via ISO2 codes across all 28 EU member states.
 
+**Note on reproducibility:** the analysis script builds its working data from the raw Eurobarometer microdata file (`ZA7575.dta`), which is not included in this repository. Eurobarometer 91.4 is freely available but requires registration with GESIS: [search.gesis.org/research_data/ZA7575](https://search.gesis.org/research_data/ZA7575?doi=10.4232/1.13429). Download the `.dta` file, place it in the repository root, and the script will run end to end. `data/merged_data_dummy.csv` is the already-merged and cleaned dataset produced by the script (see `write_csv()` near the end of the `.qmd`), included here so the modelling steps can be inspected or re-run without needing to reconstruct the merge from scratch.
+
 ## Methodology
 
 1. **Per-country logistic regressions** to visualize heterogeneity in individual-level effects across the 28 countries before formal multilevel modelling
@@ -37,7 +39,7 @@ All models estimated as binomial GLMMs using the `lme4` package.
 lgbt-rights-multilevel-model/
 ├── multilevel_lgbt_rights.qmd   # Full analysis (Quarto document)
 ├── data/
-│   └── merged_data_dummy.csv    # Merged Eurobarometer + V-Dem data used to fit the models
+│   └── merged_data_dummy.csv    # Merged, cleaned Eurobarometer + V-Dem data (script output)
 ├── README.md
 ├── LICENSE
 └── .gitignore
@@ -45,10 +47,12 @@ lgbt-rights-multilevel-model/
 
 ## Requirements
 
-`R` (>= 4.2) with: `tidyverse`, `lme4`, `lmerTest`, `broom.mixed`, `ggeffects`, `sjPlot`, `kableExtra`
+`R` (>= 4.2) with: `tidyverse`, `haven`, `lme4`, `lmerTest`, `broom.mixed`, `ggeffects`, `sjPlot`, `kableExtra`, `vdemdata`
 
 ```r
-install.packages(c("tidyverse", "lme4", "lmerTest", "broom.mixed", "ggeffects", "sjPlot", "kableExtra"))
+install.packages(c("tidyverse", "haven", "lme4", "lmerTest", "broom.mixed", "ggeffects", "sjPlot", "kableExtra"))
+# vdemdata (for the V-Dem macro data) is installed from GitHub:
+# remotes::install_github("vdeminstitute/vdemdata")
 ```
 
 ## How to Run
@@ -58,7 +62,9 @@ git clone https://github.com/palomanavarro22/lgbt-rights-multilevel-model.git
 cd lgbt-rights-multilevel-model
 ```
 
-Open `multilevel_lgbt_rights.qmd` in RStudio and render. The script reads `data/merged_data_dummy.csv` directly.
+To reproduce the full pipeline from raw data, download `ZA7575.dta` from GESIS (see Data section above) and place it in the repository root, then open `multilevel_lgbt_rights.qmd` in RStudio and render.
+
+To skip straight to the modelling steps, load `data/merged_data_dummy.csv` directly and run from the multilevel modelling section onward.
 
 ## Limitations & Future Research
 
@@ -88,4 +94,3 @@ This project is licensed under the MIT License, see the [LICENSE](LICENSE) file 
 ---
 
 *Coursework for the Multilevel Modeling course, MSc in Computational Social Science, UC3M.*
-
