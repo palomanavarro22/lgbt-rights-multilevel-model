@@ -1,0 +1,1096 @@
+---
+title: "draft challenge"
+format: html
+editor: visual
+---
+
+# INTRODUCTION
+
+The European Commision conducted a **Eurobarometer survey in 2019** focusing on discrimination within the European Union, especially for LGBTQ community, and ethnic minorities. This project focuses on the LGBTQ community, specifically on cross-national variation in support for equal rights, contextualised against the 2015 Eurobarometer findings reported in the challenge paper. From the Table 1 in the paper, our main question is "qc_15.1 :*To what extent do you agree or disagree with the following statement?: “Gay, lesbian and bisexual people should have the same rights as heterosexual people”* . We can observe that in Slovakia it ranges around 31% to 98% in Sweden. This is a spread of nearly 70 percentage points.
+
+Furthermore, there are 9 countries which we face with a decrease with th our statement, and these countries are Bulgaria, Czech Republic, Denmark, Ireland, Hungary, Italy, Croatia, Malta, and Slovakia.
+
+Understanding these ranges among 28 European countries how and why in some countries it has increased and in some it has decreased is not merely through individual level nor country level. Therefore, we aim to understand cross-national variation in LGBTQ rights support by considering both individual and country-level factors through a multilevel analytical framework
+
+## About Data
+
+To address our investigation, we used Special Eurobarometer 493 (wave 91.4, fielded between 9–25 May 2019 across all 28 EU member states, N = 27,438) for the individual-level data. Whereas, we complement country-level data from the V-Dem dataset (Maerz et al., 2025), filtered to the 2019 wave to match the survey year. Countries are matched between dataset using ISO2 country codes, resulting in a complete merge of all 28 EU member states present in both datasets.
+
+**INDIVIDUAL- LEVEL (MICRO DATA)**
+
+The Eurobarameter survey data captures respondent's socio-demographic characteristics, political orientations, religious affiliations, minority identities, personal experiences with discrimination and attitudes/opinions about LGBTQ rights. The variables we used in the first place are:
+
+-   Dependent (target variable):
+
+    -   qc15_1: lgbt_rights - Gay, lesbian and bisexual people should have the same rights as heterosexual people. The original response scale runs from 1 (totally agree) to 4 (totally disagree), with a fifth category for "don't know."
+
+-   Socio-demographic variables:
+
+    -   d11: age - coded as exact age in years.
+
+    -   d10 : gender - coded as (1) man or (2) woman
+
+    -   d8r2: education - measured as age at which the respondent stopped full-time education
+
+    -   d15a_r2: occupation - coded from 1 to 8 as categories, such as 1 refers to self-employed, 2 to managers, 6 to unemployed, 7 as retired and 8 as students.
+
+    -   d7r2: marital status - coded from 1 to 7. 1 refers to unmarried, 2 refers to Re-Married/Single with partner, 3 refers to divorced or separated, 4 as widowed, 5 as other, 7 as refusal to answer
+
+    -   d25: urban- distinguishing rural areas, small/medium towns, and large cities
+
+    -   d63: social class - self-reported ranging from working class to upper class
+
+    -   d60: financial hardship - asking how often the respondent had difficulty paying bills at the end of the month over the past 12 months
+
+-   Political orientation variables:
+
+    -   d1: left_right - having the ideology of left and right by self replacement, scale from 1 (left) to 10 (right), 97 as refusal and 98 as don't know
+
+    -   d72_1: voice_eu - respondent's voice matters in EU, scaled from (1) totally agree to (4) totally disagree; 7 as refusal and 8 as don't know
+
+    -   d72_2 : voice_country - respondent's voice matters in their country, same scaling as voice_eu
+
+    -   d77: opinion_leader - measuring how often the respondent persuades friends or colleagues to share their views, scaled from 1 to 4
+
+-   Religion & Minority identity
+
+    -   sd3: religion – using a list of religious denominations including Catholic, Orthodox Christian, Protestant, other Christian, Jewish, Sunni Muslim, Shia Muslim, other Muslim, Sikh, Buddhist, Hindu, atheist, and non-believer or agnostic, with a refusal option.
+
+    -   sd2_1: min_ethnic - considering yourself as an ethnic minority
+
+    -   sd2_2: min_skin - considering yourself as an minority in terms of colour
+
+    -   sd2_3: min_religion - considering yourself as an religious minority
+
+    -   sd2_4 : min_roma - considering yourself as being Roma
+
+    -   sd2_5 : min_sexual - considering yourself as a sexual minority (like being gay, lesbian, bisexual, transgender or intersex)
+
+-   LGBTQ-specific
+
+    -   sd1_4: lgbt_friends - having LGBTQ friends (yes/no)
+
+    -   qc1_4: discrim_percep - opinion about discrimination in sexual orientation in your country, on a scale from very widespread to very rare
+
+    -   qc2_4: discrim_exp - In the past 12 months have you personally felt discriminated
+
+    -   qc7: antidiscrim_eff - fighting for discrimination is effective or not effective on a scale from 1 "not at all effective" to 10 "very effective", with 11 indicating no efforts are made and 12 "don't know"
+
+    -   qc5_1: online_activism - asking whether the respondent shared content on social networks about incidents of discriminatory treatment in the past 12 months
+
+-   Political discussion
+
+    -   d71_1: discuss_nat - frequency in discussion about national political matters
+
+    -   d71_2: discuss_eu - frequency in discussion about european political matters
+
+    -   d71_3: discuss_local - frequency in discussion about local political matters
+
+-   Media & Technology
+
+    -   d43b: mobile - having personal mobile telephone (yes/no)
+
+    -   d62_3: internet - using internet on you mobile device (scale from 1-7)
+
+-   Country & Interview metadata
+
+    -   d70 : satisfaction - satisfaction in your life (scale from 1-5)
+
+    -   p4: interview_size - number of persons in your interview, including interviewer (scale from 1-4)
+
+    -   p5: cooperation - respondent cooperation (scale from 1-4)
+
+    -   p6: locality - size of locality
+
+    -   p7: region
+
+**COUNTRY- LEVEL (MACRO DATA)**
+
+To understand in a deeper level what are the factors that may explain the differences across countries towards LGBT people, we chose the V-Dem dataset. It provides country-level measures of political context, including the political power of LGBT groups (`v2pepwrort`), freedom of expression (`v2x_freexp_altinf`), political polarisation (`v2cacamps`), online hate speech (`v2smpolhate`), educational equality (`v2peedueq`), and GDP per capita (`e_gdppc`). All variables are continuous.
+
+## Strategy
+
+The data for our project contains two-level hierarchical structure: individual and country level. Individual level is nested within country level. Ignoring this structure would underestimate standard errors and inflate the apparent precision of individual-level predictors. Therefore, we adopt a multilevel modelling framework using binomial generalised linear mixed models (GLMMs), estimated with the `lme4`package in R.
+
+We did three steps. First, a null random-intercept model that is estimated to decompose total variance in LGBTQ support between the levels. The Variance Partition Coefficient (VPC) establishes whether multilevel modelling is warranted.
+
+Second is a random-intercept model with individual-level predictors which adds all individual-level covariates as fixed effects, while allowing country intercepts to vary. After adding individual predictors, The residual VPC indicates how much country-level variation remains after accounting for compositional differences between countries.
+
+Thirdly, we are having a model which is adding country- level predictors introduces V-Dem macro indicators as additional fixed effects. Comparing residuals among the models allows us to acknowledge what share of country-level variance is explained by individual composition versus national context.
+
+Before these steps, we estimate separate logistic regressions for each of the 28 countries. This allows us to visualize heterogeneity in individual-level effects across countries and to inspect whether country-level intercepts correlate descriptively with the macro indicators, before formally modelling these patterns.
+
+# Setting up The Data
+
+```{r libraries}
+library(tidyverse)
+library(haven)
+library(readxl)
+library(dplyr)
+library(countrycode)
+library(GGally)
+library(devtools)
+library(DataExplorer)
+library(mice)
+library(randomForest)
+library(lme4)
+library(lmerTest)
+library(broom.mixed)
+library(lmtest)
+library(ggeffects)
+```
+
+```{r}
+#install_github("vdeminstitute/vdemdata")
+#Maerz, Seraphine F., Amanda B. Edgell, Sebastian Hellemeier, Nina Illchenko, and Linnea Fox. 2025. vdemdata: An R package to load, explore and work with the most recent V-Dem (Varieties of Democracy) dataset. https://github.com/vdeminstitute/vdemdata
+
+library(vdemdata)
+
+micro_data <- read_dta("ZA7575.dta") #survey data
+macro_data <- vdem
+```
+
+# DATA
+
+### Data cleaning
+
+```{r}
+set.seed(123) 
+
+macro_data <- macro_data |> 
+  filter(year == 2019) #only 2019 observations
+
+micro_data$isocntry <- ifelse(
+  micro_data$isocntry %in% c("DE-W", "DE-E"),
+  "DE",
+  micro_data$isocntry
+) # merging variable DE to one instead for future analysis
+
+macro_data$iso2 <- countrycode(macro_data$country_text_id,
+                               origin = "iso3c",
+                               destination = "iso2c")
+macro_data_filtered <- macro_data |> 
+  filter(iso2 %in% micro_data$isocntry)
+
+#countries in macro level dataset
+macro_data_filtered |> 
+  summarise(unique_countries = n_distinct(iso2)) #28
+
+#countries in micro levele dataset
+micro_data |> 
+  summarise(unique_countries = n_distinct(isocntry)) #28
+```
+
+### Selecting Variables
+
+```{r}
+micro_data <- micro_data |> 
+  select(qc15_1, d11, sd1_4, sd3, qc1_4, d70, d71_1, d71_2, d71_3, qc2_4, qc5_1, qc7, d1, d7r2, d10, d8r2, d15a_r2, d25, d43b, d60, d62_3, d63, d72_1, d72_2, d77, p4, p5, p6, p7, sd2_1, sd2_2, sd2_3, sd2_5, sd2_4, isocntry, w1)
+
+macro_data_filtered <- macro_data_filtered |> 
+  select(iso2, v2pepwrort, e_gdppc, v2x_freexp_altinf, v2xcl_rol, v2cacamps, v2smpolhate, v2peedueq, country_text_id)
+```
+
+### Merging the Data
+
+```{r}
+macro_data_filtered <- macro_data_filtered |> 
+  rename(isocntry = iso2)
+
+merged_data <- left_join(micro_data, macro_data_filtered, by = c("isocntry"))
+merged_data <- merged_data |>
+  mutate(across(where(haven::is.labelled), ~ as.numeric(.)))
+```
+
+### Renaming
+
+```{r}
+merged_data <- merged_data |>
+  rename(
+    #Dependent variable
+    lgbt_rights      = qc15_1,
+    #Socio-demographic
+    age             = d11,
+    gender          = d10,
+    education       = d8r2,
+    occupation      = d15a_r2,
+    marital         = d7r2,
+    urban           = d25,
+    social_class    = d63,
+    fin_hardship    = d60,
+    #political orientation
+    left_right      = d1,
+    voice_eu        = d72_1,
+    voice_country   = d72_2,
+    opinion_leader  = d77,
+    #religion & minority identity
+    religion        = sd3,
+    min_ethnic      = sd2_1,
+    min_skin        = sd2_2,
+    min_religion    = sd2_3,
+    min_roma        = sd2_4,
+    min_sexual      = sd2_5,
+    #LGBT-specific
+    lgbt_friends    = sd1_4,
+    discrim_percep  = qc1_4,
+    discrim_exp     = qc2_4,
+    antidiscrim_eff = qc7,
+    online_activism = qc5_1,
+    #political discussion
+    discuss_nat     = d71_1,
+    discuss_eu      = d71_2,
+    discuss_local   = d71_3,
+    #media & technology
+    mobile          = d43b,
+    internet        = d62_3,
+    #country & interview metadata
+    sastisfaction   = d70,
+    interview_size  = p4,
+    cooperation     = p5,
+    locality        = p6,
+    region          = p7,
+    #v-dem 
+    lgbt_power      = v2pepwrort,
+    gdp_pc          = e_gdppc,
+    free_expr       = v2x_freexp_altinf,
+    rule_of_law     = v2xcl_rol,
+    polarisation    = v2cacamps,
+    hate_speech     = v2smpolhate,
+    educ_equality   = v2peedueq
+  )
+```
+
+### Recoding
+
+Four variables originally coded with response options beyond a simple yes/no are recoded to binary (1/0) indicators to enable straightforward interpretation in regression models:
+
+-   `mobile`: originally 1 (yes) and 2 (no) → recoded to 1 = owns a mobile phone, 0 = does not
+
+-   `gender`: originally 1 (man) and 2 (woman) → recoded to 1 = man, 0 = woman
+
+-   `online_activism`: originally 1 (yes), 2 (no), 3 (don't know) → recoded to 1 = shared discrimination-related content online, 0 = did not
+
+-   `lgbt_friends`: originally 1 (yes), 2 (no), with refusal and DK categories → recoded to 1 = has LGBTQ friends or acquaintances, 0 = does not
+
+```{r}
+merged_data <- merged_data |> 
+  mutate(mobile = ifelse(mobile == 1, 1, 0), 
+         gender = ifelse(gender == 1, 1, 0),
+         online_activism = ifelse(online_activism == 1, 1, 0),
+         lgbt_friends = ifelse(lgbt_friends == 1, 1, 0))
+```
+
+```{r}
+plot_bar(merged_data$mobile) 
+plot_bar(merged_data$gender)
+plot_bar(merged_data$online_activism)
+plot_bar(merged_data$lgbt_friends)
+plot_histogram(merged_data$lgbt_rights)
+```
+
+# EDA
+
+We will perform descriptive analysis on the merged, renamed and recoded dataset we plan on working with.
+
+### Introducing `merged_data`\`
+
+```{r}
+plot_intro(merged_data) 
+
+introduce(merged_data)
+```
+
+From this initial plot, we can see that 4.7% of the columns are discrete, while the remaining 95.3% are continuous; we also do not have any missing columns.
+
+98.2% of the rows are complete, leaving us with a very low percentage of missing values. The total amount of missing values is of 495 observations.
+
+### Histogram and Density Plots
+
+```{r}
+plot_density(merged_data)
+
+plot_histogram(merged_data)
+```
+
+In order to see the distribution of our continuous variables, we plotted their density and histograms.
+
+### Missing values Visualization and Distribution
+
+```{r}
+#missing Values
+plot_missing(merged_data)
+
+#variables distribution
+merged_data |> 
+  select(where(is.numeric)) |> 
+  boxplot(las = 2, col = "lightblue", main = "Variable Distributions")
+```
+
+We can see, from the missing values plotted, that in our data set `region`\` is the only column that has a small percentage of NAs. We are most likely going to remove the column, since it does not add any relevant information regarding our inquiry.
+
+The box plot shows that we need to standardize the variables, as their different scales could affect our analysis.
+
+### Visualizations and Distributions based on Target Variable
+
+```{r}
+#Target Variable
+merged_data <- merged_data |> 
+  mutate(lgbt_rights = factor(lgbt_rights))
+
+merged_data |> 
+  ggplot(aes(x = lgbt_rights)) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Distribution of lgbt_rights", x = "Category", y = "Count")
+
+merged_data |> 
+  select(-c("isocntry", "country_text_id")) |> 
+  plot_bar(by = "lgbt_rights")
+
+```
+
+As we mentioned in the introduction our target variable ranges from 1 to 5, where:
+
+-   1: totally agree
+
+-   2: tend to agree
+
+-   3: tend to disagree
+
+-   4: totally disagree
+
+-   5: don't know.
+
+From the bar plot, we can see most of the observations fall into category 1 - totally agree.
+
+Furthermore, we can see that respondents who have LGBTQ friends, have experienced discrimination and are online activists are more prone to totally agree with the statement in question. Gender does not seem to have a strong effect on responses, since they are very similar among each other. People that do not own a mobile phone generally agree less with the statement, along with people from an ethnic minority. Religious people seem to agree slightly less with the statement.
+
+Sexual minorities tend to agree to the statement, while almost half of the recorded Roma people do not.
+
+### Correlation Matrix
+
+```{r}
+#Correlation matrix
+merged_data |> 
+  select(where(is.numeric)) |> 
+  ggcorr(label = TRUE, label_size = 2, hjust = 0.75)
+```
+
+Since the matrix showed correlations between certain similar variables, we decided to remove some of them as they were not vital to our inquiry. These variables are:
+
+-   `Rule of law`: highly correlated with freedom of expression, polarization and GDP per capita.
+
+-   `locality`: high correlation with urban
+
+-   `voice_eu`: similar to voice_country which refers more to the individual level and it is more relevant.
+
+-   `discussion`: all three levels (EU, national, local) were removed since their correlation and irrelevance towards the question.
+
+Reminder: we are also removing to `region` since it contains NAs and its presence does not add anything relevant to the research. For cleanliness purposes, 'country_text_id' was also removed.
+
+```{r}
+merged_data <- merged_data |> 
+  select(-c(rule_of_law, locality, voice_eu, discuss_nat, 
+            discuss_eu, discuss_local, region, country_text_id)) |> 
+  relocate(isocntry, .before = everything())
+
+write_csv(merged_data, file = "merged_data.csv")
+```
+
+## Final Recoding
+
+1.  For the `religion`\` variable, we decided to group the observations in 7 clusters to have a more balanced and clearer distinction. This grouping process was also conducted because of the small quantity of some groups, like Jewish, that only had 58 observations.
+
+```{r}
+table(merged_data$religion)
+
+merged_data <- merged_data |>
+  mutate(
+    religion = case_when(
+      religion == 1              ~ "Catholic",
+      religion == 2              ~ "Orthodox",
+      religion == 3              ~ "Protestant",
+      religion == 4              ~ "Other Christian",
+      religion %in% c(6, 7, 8)  ~ "Muslim",
+      religion %in% c(5, 9, 10, 11, 14) ~ "Other Religion",
+      religion %in% c(12, 13)   ~ "Atheist/Non-believer",
+      religion %in% c(15, 16)   ~ NA),
+    religion = factor(
+      religion,
+      levels = c("Catholic", "Orthodox", "Protestant", "Other Christian",
+                 "Muslim", "Other Religion", "Atheist/Non-believer")
+    )) |>
+  filter(!is.na(religion))
+
+merged_data |> distinct(merged_data$religion)
+```
+
+2.  According to codebook, these are the codes that group the answers to age when finished full time `education`\`:
+
+-   1: up to 15 years
+
+-   2: 16-19
+
+-   3: 20 or more
+
+-   4: still studying
+
+-   5: no full time education
+
+-   7: refused to answer
+
+-   8: don't know
+
+Even if category 7 corresponds to data missing at random, given the small amount of observations (55) we decided to not impute it and just remove it.
+
+```{r}
+table(merged_data$education) 
+
+merged_data <- merged_data |> 
+  filter(education != 7) |>
+  mutate(education = factor(education))
+```
+
+3.  In `urban`\`variable, category 8, corresponding to 'Don't know', only has 14 observations. Given the size of this category and the relevance of the variable, we decided to remove it from the data set.
+
+```{r}
+table(merged_data$urban)
+
+merged_data <- merged_data |> 
+  filter(urban != 8)
+```
+
+4.  `antidiscrim_eff`\` variable measures efforts to fight discrimination in each country, where 11 corresponded to no efforts made and the rest was measured in a scale from 1 to 10 and 12 corresponded to 'don't know'. In order to make this cleaner, we moved 11 (no efforts) at the bottom of the scale and transformed it to 0.
+
+```{r}
+merged_data <- merged_data |>
+  mutate(
+    antidiscrim_eff = as.integer(antidiscrim_eff),
+    antidiscrim_eff = case_when(
+      antidiscrim_eff == 11 ~ 0,        #no efforts --> bottom of scale
+      antidiscrim_eff == 12 ~ 12, 
+      TRUE                  ~ antidiscrim_eff  #1-10 scale unchanged
+    ))
+
+table(merged_data$antidiscrim_eff)
+```
+
+5.  `marital`\`: 5 and 7 are 'refusal to answer' and 'other'. Since their small size and relative relevance to the statement, we decided to merge them into a single residual category (coded 5) to avoid sparse cells in the model while retaining the observations.
+
+```{r}
+table(merged_data$marital)
+
+merged_data <- merged_data |>
+  mutate(
+    marital = as.integer(marital),
+    marital = case_when(
+      marital == 1             ~ 1,
+      marital == 2             ~ 2,
+      marital == 3             ~ 3,
+      marital == 4             ~ 4,
+      marital %in% c(5, 7)    ~ 5),
+    marital = factor(marital,
+      levels = c(1, 2, 3, 4, 5)))
+```
+
+# Imputation : Handling Missing Data
+
+Even if there are no concrete missing data in the data frame, we decided to treat spontaneous refusals as missing values, since they are missing at random.
+
+We are imputing two variables which are `left_right`\`and `social_class`\`
+
+Imputing the `left_right`\` variable, ranging from 1 to 10 but where 97 corresponds to 'refusal to answer'. 2775 observations are, therefore, missing at random. 98 refers to 'don't know', that we decided to treat as its own category.
+
+Also, imputing `social_class`\`variable since it ranges from 1 to 7 but where 6 refers to 'Other (spontaneous)', 7 refers to 'None (spontaneous), 8 is 'Refusal (spontaneous)', and 9 refers to 'Don't Know'. We are going to group 6,7,8 and treat them as NAs.
+
+```{r}
+table(merged_data$left_right)
+table(merged_data$social_class)
+```
+
+```{r}
+library(mice)
+library(randomForest)
+
+# recode missing values before imputation
+merged_data <- merged_data |> 
+  mutate(
+    left_right   = ifelse(left_right == 97, NA, left_right),
+    social_class = as.integer(social_class),
+    social_class = case_when(
+      social_class %in% c(1, 2, 3, 4, 5) ~ social_class,
+      social_class %in% c(6, 7, 8)        ~ NA_integer_,
+      social_class == 9                    ~ 9L
+    )
+  )
+
+# prepare numeric data
+data_numeric <- merged_data |> 
+  select(where(is.numeric)) |>
+  mutate(across(everything(), as.numeric))
+
+# initialise mice to get default methods vector
+init <- mice(data_numeric, maxit = 0, seed = 123)
+meth <- init$method
+
+# visual comparison across three methods
+mice_imputed <- data.frame(
+  original_lr = merged_data$left_right,
+  original_sc = merged_data$social_class,
+  
+  lr_pmm  = complete(mice(data_numeric, method = {m <- meth; m["left_right"] <- "pmm";  m["social_class"] <- "pmm";  m}, m = 5, seed = 123))$left_right,
+  sc_pmm  = complete(mice(data_numeric, method = {m <- meth; m["left_right"] <- "pmm";  m["social_class"] <- "pmm";  m}, m = 5, seed = 123))$social_class,
+  
+  lr_cart = complete(mice(data_numeric, method = {m <- meth; m["left_right"] <- "cart"; m["social_class"] <- "cart"; m}, m = 5, seed = 123))$left_right,
+  sc_cart = complete(mice(data_numeric, method = {m <- meth; m["left_right"] <- "cart"; m["social_class"] <- "cart"; m}, m = 5, seed = 123))$social_class,
+  
+  lr_rf   = complete(mice(data_numeric, method = {m <- meth; m["left_right"] <- "rf";   m["social_class"] <- "rf";   m}, m = 5, seed = 123))$left_right,
+  sc_rf   = complete(mice(data_numeric, method = {m <- meth; m["left_right"] <- "rf";   m["social_class"] <- "rf";   m}, m = 5, seed = 123))$social_class
+)
+```
+
+Now we plot the results.
+
+```{r}
+# plot left_right distributions
+variables_lr <- c("original_lr", "lr_pmm", "lr_cart", "lr_rf")
+titles_lr    <- c("Original left_right", "PMM", "CART", "RF")
+colors_fill  <- c("skyblue", "#15ad4f", "#6a6ad9", "#e65100")
+
+mice_imputed |>
+  pivot_longer(all_of(variables_lr), names_to = "method", values_to = "value") |>
+  mutate(title = factor(method, levels = variables_lr, labels = titles_lr)) |>
+  ggplot(aes(x = value, fill = title)) +
+  geom_histogram(binwidth = 1, color = "#808080") +
+  facet_wrap(~title, scales = "free_y") +
+  scale_fill_manual(values = colors_fill) +
+  theme_classic() + theme(legend.position = "none") +
+  labs(title = "left_right imputation comparison")
+
+# plot social_class distributions
+variables_sc <- c("original_sc", "sc_pmm", "sc_cart", "sc_rf")
+titles_sc    <- c("Original social_class", "PMM", "CART", "RF")
+
+mice_imputed |>
+  pivot_longer(all_of(variables_sc), names_to = "method", values_to = "value") |>
+  mutate(title = factor(method, levels = variables_sc, labels = titles_sc)) |>
+  ggplot(aes(x = value, fill = title)) +
+  geom_histogram(binwidth = 1, color = "#808080") +
+  facet_wrap(~title, scales = "free_y") +
+  scale_fill_manual(values = colors_fill) +
+  theme_classic() + theme(legend.position = "none") +
+  labs(title = "social_class imputation comparison")
+
+```
+
+Based on similarities with the original graph, we selected PMM. The selected imputation method's result was implemented in the data set.
+
+```{r}
+meth["left_right"]   <- "pmm"
+meth["social_class"] <- "pmm"
+
+mids_final <- mice(data_numeric, method = meth, m = 5, seed = 123)
+m_final    <- with(mids_final, lm(left_right ~ social_class))
+summary(pool(m_final))
+
+# apply back to merged_data
+merged_data <- merged_data |> 
+  mutate(
+    left_right   = complete(mids_final, 1)$left_right,
+    social_class = complete(mids_final, 1)$social_class)
+
+#write_csv(merged_data, file = "merged_data.csv")
+#merged_data <- read_csv("merged_data.csv")
+```
+
+# Dummyfying our target variable
+
+The original dependent variable (lgbt_rights) is measured on a four-point ordinal scale: 1 = totally agree, 2 = tend to agree, 3 = tend to disagree, 4 = totally disagree, with a fifth category (5 = don't know). As shown in the EDA, the distribution is strongly skewed toward agreement, with the majority of respondents in category 1. We collapse the variable into a binary indicator (lgbt_rights_dummy): responses of 1 or 2 are coded as 1 (support) and responses of 3 or 4 are coded as 0 (oppose). Respondents who answered "don't know" (category 5) are treated as missing and excluded, as they cannot be meaningfully assigned to either position.
+
+```{r}
+merged_data_dummy <- merged_data |>
+  mutate(
+    lgbt_rights_dummy = case_when(
+      as.numeric(as.character(lgbt_rights)) %in% c(1, 2) ~ 1,  # agree
+      as.numeric(as.character(lgbt_rights)) %in% c(3, 4) ~ 0,  # disagree
+      as.numeric(as.character(lgbt_rights)) == 5 ~ NA_real_    # don't know → drop
+    )
+  ) |>
+  filter(!is.na(lgbt_rights_dummy))
+
+# check the distribution
+table(merged_data_dummy$lgbt_rights_dummy)
+prop.table(table(merged_data_dummy$lgbt_rights_dummy))
+```
+
+Now, we have midly imbalanced data. This dummfying to binarisation methodologically, enables the use of binomial logistic regression and GLMMs, which model the log-odds of a dichotomous outcome and are well suited to the multilevel framework we adopt.
+
+# Standardization and factoring
+
+Before modelling as a last step for our cleaned, ready and transformed dataset, we are applying standartization and factoring.
+
+-   Factoring: Variables that are stored as numeric codes but represent discrete, unordered or ordered categories are converted to factors. This ensures they are treated as categorical predictors in the regression models rather than as continuous quantities.
+
+-   Standardization: Continuous variables are standardised to zero mean and unit standard deviation (z-scores) using scale(). This applies to: age, online hate speech, perceived discrimination against sexual minorities, LGBT political power, educational equality, GDP per capita, freedom of expression, and political polarisation.
+
+```{r}
+#convert categorical variables to factors 
+factor_vars <- c("occupation", "voice_country", "sastisfaction", "urban", 
+                 "opinion_leader", "antidiscrim_eff", "interview_size", 
+                 "fin_hardship", "left_right", "internet", "cooperation")
+
+merged_data_dummy <- merged_data_dummy |>
+  mutate(across(all_of(factor_vars), ~ factor(.)))
+
+#define vars to scale
+vars_to_scale <- c("age", "hate_speech", "discrim_percep", "lgbt_power", 
+                   "educ_equality", "gdp_pc", "free_expr", "polarisation")
+
+#apply to merged_data_dummy
+merged_data_dummy <- merged_data_dummy |>
+  mutate(across(all_of(vars_to_scale), ~ scale(.)[,1]))
+```
+
+# Separate analyses by country
+
+Nesting the individual data by country.
+
+```{r}
+merged_data_nested <- merged_data_dummy |> 
+  group_by(isocntry) |> 
+  nest()
+
+merged_data_nested
+```
+
+```{r}
+#basic diagnostics and analysis
+class(merged_data_nested$data)
+length(merged_data_nested$data)
+
+merged_data_dummy |> 
+  select(where(is.numeric)) |> 
+  ggcorr(label = TRUE, label_size = 2, hjust = 0.75)
+```
+
+# Logistic model for each country
+
+Before diving into the main hierarchical model, we performed a quasi-binomial logistic model as a preparatory step to establish each country's baseline intercept of LGBT+ support. The model is applied to the nested data set - one model per country - to examine the influence of individual level predictors within national contexts and to extract country-specific intercepts.
+
+The model selected is quasi-binomial to handle possible overdispersion and the weights as indicated in the code book were applied.
+
+```{r}
+#store the fitted logistic models as a column in the nested data frame
+model <- merged_data_nested |> 
+  mutate(model = purrr::map(data,
+                            ~ glm(lgbt_rights_dummy ~ age + gender + education + 
+                    occupation + religion + marital + urban +
+                    social_class + fin_hardship + left_right + min_sexual + 
+                    lgbt_friends + discrim_percep + discrim_exp + 
+                    antidiscrim_eff + online_activism + mobile + internet + 
+                    sastisfaction + interview_size + cooperation,
+                                  data = .x,
+                                  family = quasibinomial,
+                                  weights = .x$w1)))
+
+model
+```
+
+The following step was to extrapolate the coefficients from every country's model to examine the results. From this tibble, the estimate, standard error, statistic and p-value of each individual-level predictor for each country was obtained.
+
+```{r}
+#estimation results for all models (one for each country)
+estimation <- model |> 
+  mutate(model.results = purrr::map(model, broom::tidy))
+
+#unnest to view tidy results across all countries
+estimation |> 
+  unnest(model.results)
+
+estimation
+```
+
+# Extracting coefficients
+
+Here only three columns were kept, the country code, the individual level variable and the obtained estimate.
+
+```{r}
+#clean the data set
+logit.coeff <- estimation |> 
+  unnest(model.results) |> 
+  dplyr::select(isocntry, term, estimate)
+
+logit.coeff
+
+#one row per country, one column per predictor
+logit.coeff <- logit.coeff |> 
+  pivot_wider(names_from = term, values_from = estimate)
+
+logit.coeff
+```
+
+Just by looking at each country's intercept, we can grasp a first general idea of the level of LGBT+ acceptance, like in Belgium, for example, we can see that it is already pretty high. All the other terms that are present and their related estimate indicate how influential each individual-level category is for the indicator we are interested in.
+
+The countries with the highest baseline support are Luxembourg, The Netherlands and, surprisingly, Malta. This latter finding is unexpected, given that the country's acceptance rate decreased since the 2015's version of the survey.
+
+Among the most relevant predictors, both negatively and positively, there are LGBT+ friends, religion and political orientation. Generally, having friends that are part of the LGBTQ+ community and being a sexual minority are consistent positive predictors. Muslims and Catholics both seem to have a consistent negative influence in acceptance rate, similarly to the more right-winged political affiliations.
+
+From this initial analysis we can already identify strong individual-level predictors that could have played a relevant role in changes within the countries' belief that gay, lesbians and bisexual people should have equal rights.
+
+# Country-level intercepts by macro-level context
+
+Here we do the same thing but focusing on macro-level country variables that we selected in the V Dem data set.
+
+```{r}
+#country-level data frame with macro variables
+country_df <- merged_data_dummy |> 
+  dplyr::select(isocntry, lgbt_power, gdp_pc, free_expr, polarisation, 
+                hate_speech, educ_equality) |> 
+  distinct()
+
+#join intercepts into country-level data frame
+logit.df <- country_df |> 
+  left_join(
+    logit.coeff |> dplyr::select(isocntry, intercept = `(Intercept)`),
+    by = "isocntry"
+  )
+
+logit.df
+```
+
+Generally, we can see that countries that have a positive intercept - like Belgium and France - also have positive coefficients for the macro-level variables. This suggests that higher representation, freedom of expression and education quality, for example, have a positive effect in acceptance. Consistently, countries that show a negative intercept often times have negative coefficients.
+
+# Coefficient plots across countries
+
+Now we visually represented some of our first findings. We selected age and LGBT friends as two variables to explore more specifically.
+
+```{r}
+#all coefficients with confidence intervals from estimation
+coeff_plot_df <- estimation |>
+  unnest(model.results) |>
+  dplyr::select(isocntry, term, estimate, std.error) |>
+  mutate(
+    ci_low  = estimate - 1.96 * std.error,
+    ci_high = estimate + 1.96 * std.error
+  )
+
+#coefficients plot for age
+coeff_plot_df |>
+  filter(term == "age") |>
+  ggplot(aes(x = estimate, y = reorder(isocntry, estimate))) +
+  geom_point() +
+  geom_errorbarh(aes(xmin = ci_low, xmax = ci_high), height = 0.2) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Effect of age on LGBT support by country",
+       x = "Coefficient (log-odds)", y = "Country") +
+  theme_bw()
+```
+
+This graph plotting the effect of age on the level of acceptance for each country indicates a mostly coherent pattern. In most EU countries, age has a small negative effect on acceptance, but it does not strongly impact the dependent variable. Among the most notable countries there is The Netherlands, where older people seem to agree more with the statement we are investigating. Malta, Luxembourg and Portugal are the most negative countries, suggesting that older people tend to be less supportive. Sweden has a huge range compared to other countries, that might be a result of the model's instability, given that the country's intercept was also unlikely high.
+
+```{r}
+#coefficient plot for lgbt_friends
+coeff_plot_df |>
+  filter(term == "lgbt_friends") |>
+  ggplot(aes(x = estimate, y = reorder(isocntry, estimate))) +
+  geom_point() +
+  geom_errorbarh(aes(xmin = ci_low, xmax = ci_high), height = 0.2) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Effect of LGBT friends on LGBT support by country",
+       x = "Coefficient (log-odds)", y = "Country") +
+  theme_bw()
+```
+
+The same plot was created for LGBT friends, which was a consistently positive indicator throughout most countries. This plot indeed confirms our finding, since most countries signal a positive correlation between having LGBTQ+ friends and supporting equal rights.
+
+Italy and Luxembourg seem to have the coefficients closer to zero and a very small range, suggesting that while the effect is positive, the variable's effect is weaker. The Netherlands and Luxembourg are also placed close to zero, but their range is substantially larger, probably signaling more heterogeneity within the responses.
+
+# Hierarchical Models
+
+## Variance Components
+
+```{r}
+# Null random-intercept model: partitions lgbt_rights variation 
+# between individual level and country level
+mod_null <- readRDS("mod_null.rds")
+#mod_null <- glmer(lgbt_rights_dummy ~ 1 + (1 | isocntry),
+#              data = merged_data_dummy,
+ #             family = binomial,
+  #            weights = w1)
+
+summary(mod_null)
+```
+
+The Variance Components model separates variation across levels/countries. In this case, the average log-odds of supporting LGBT rights across all countries is 1.22, if we convert it to a probability we can say that on average there is 77% probability of an individual supporting LGBT rights across the 28 countries.
+
+On the other hand, the scaled residuals show a large scale of variation, this suggests that as we do not have individual-level predictors, the model predicts poorly some individual cases. This model cannot yet address why the countries differ.
+
+```{r}
+# Results in tidy format
+mod_null.res <- tidy(mod_null)
+
+# Country-level variance
+sigma2_u <- mod_null.res |>
+    filter(effect == "ran_pars", group == "isocntry") |>
+    pull(estimate) |>
+    (\(x) x^2)()  # equal to variance
+
+
+sigma2_u
+```
+
+Variation due to country level is 1.41. This is how much the baseline shifts depending on which country your are in.
+
+```{r}
+# For binary outcomes, individual-level variance is fixed at π²/3
+(sigma2_i <- (pi^2) / 3)
+
+```
+
+Variation due to individual level variance is 3.3, with no predictors. This is how much individuals within the same country differ from their country's baseline.
+
+```{r}
+# Variance Partition Coefficient
+(sigma2_u / (sigma2_u + sigma2_i))
+```
+
+Approximately 30% of the total variation in LGBT rights acceptance is attributable country level differences, which is very high. And 70% is attributed to individual level differences.
+
+```{r}
+# Single-level null model
+model1 <- glm(lgbt_rights_dummy ~ 1,
+               data = merged_data_dummy,
+               family = binomial,
+               weights = w1)
+
+# LRT via lmtest
+lrtest(mod_null, model1)
+```
+
+Here we are comparing two models. The *null-model* that accounts for country clustering with a random intercepts, against *model1* that ignores country clustering accounting that all individuals are independent. The results suggest that the null model has much better fit because it has lower log-likelihood.
+
+In sum, we can strongly justify that 30% of the variation in LGBT rights support is attributable to country-level differences.
+
+## Random Intercept Model with Individual-Level Predictors
+
+Now we try to see if by taking into account the countries individual-level variation, the LGBT rights support across countries persists or changes after accounting for the composition of their populations.
+
+```{r}
+mod2     <- readRDS("mod2.rds")
+#mod2 <- glmer(lgbt_rights_dummy ~ age + gender + education + 
+#                    occupation + religion + marital + urban +
+#                    social_class + fin_hardship + left_right + min_sexual + 
+#                    lgbt_friends + discrim_percep + discrim_exp + 
+ #                   antidiscrim_eff + online_activism + mobile + internet + 
+  #                  sastisfaction + interview_size + cooperation + 
+   #             (1 | isocntry),
+    #          data = merged_data_dummy,
+     #         family = binomial,
+      #        weights = w1)
+
+summary(mod2)
+```
+
+After adding individual-level variables, the country-level variance dropped from 1.41 to 0.73, suggesting that part of what appeared to be country-level differences was actually driven by the demographic composition of their populations.
+
+Examining the individual-level predictors that drive these differences: - Men are significantly less supportive of LGBT rights than women. - Orthodox and Muslim respondents are significantly less supportive compared to Catholics, while Atheist/Non-believers are significantly more supportive. - Higher education increases support — those with more years of education are more supportive compared to those who left education before 15. - Married and widowed individuals are significantly less likely to support LGBT rights compared to unmarried individuals. - Higher social class is associated with greater support. - Sexual minorities and those with LGBT friends are significantly more likely to support LGBT rights — the latter being the strongest predictor in the model. - Those who perceive discrimination as rare in their country are less likely to be supportive - Online activists and mobile phone owners are more likely to support, while those who report using the internet on their phone are less likely. - Lower life satisfaction is associated with lower support for LGBT rights. - Less cooperative respondents and those interviewed in larger groups are less likely to be supportive (paradata).
+
+```{r}
+#test significance of fixed effects
+car::Anova(mod2)
+```
+
+Overall, the significantly strongest predictors are gender, religion, education, marital status, LGBT friends (strongest), discrimination perception, mobile, internet, satisfaction and cooperation. Social class, financial hardship, sexual minority belonging, non-discrimination efforts, online activism, and interview size show smaller p-values. In contrast, some variables showed non-significance like age, occupation, ideology, discrimination experience and urban/rural.
+
+```{r}
+# Tidy results (individual level)
+(mod2.res <- tidy(mod2))
+```
+
+-   
+
+```{r}
+# Random effect parameters (country level)
+mod2.res |> filter(effect == "ran_pars")
+```
+
+```{r}
+# Country-level variance
+(sigma2_u_2<- mod2.res |>
+  filter(effect == "ran_pars", group == "isocntry") |>
+  pull(estimate) |>
+  (\(x) x^2)())
+
+# Individual-level variance (fixed for binary outcome)
+(sigma2_i_2 <- (pi^2) / 3)
+
+# VPC
+(sigma2_u_2 / (sigma2_u_2 + sigma2_i_2))
+```
+
+The VPC dropped from 0.3 to 0.18 after adding the individual-level predictors. This means that by accounting who lives in each country, country-level differences decrease significantly. Therefore, we can say that what appeared to be country-level differences are now explained by individual-level differences. For example, some countries appeared to be less supportive because they have a more religious composition or less educated populations.
+
+However, 18% of variation still remains at the country level and it is large, so country context matters. Thus, we will add macro-level predictors.
+
+## Random Slope Model
+
+A random slope model allows the effect of a predictor to vary across countries, rather than assuming it is the same everywhere. This analysis can suggest if the effect of the predictors on LGBT support is stronger in some countries than others.
+
+```{r}
+# Allow the effect of lgbt_friends to vary by country
+mod3     <- readRDS("mod3.rds")
+#mod3 <- glmer(lgbt_rights_dummy ~ age + gender + education + 
+ #                   occupation + religion + marital + urban +
+  #                  social_class + fin_hardship + left_right + min_sexual + 
+   #                 lgbt_friends + discrim_percep + discrim_exp + 
+    #                antidiscrim_eff + online_activism + mobile + internet + 
+     #               sastisfaction + interview_size + cooperation +                     
+                # country level
+      #          lgbt_power + gdp_pc + free_expr + polarisation + 
+       #         hate_speech + educ_equality +
+  #  (1 | isocntry),
+  #  data   = merged_data_dummy,
+   # family = binomial,
+  #  weights = w1)
+
+
+summary(mod3)
+```
+
+Here we can see that LGBT power is the only significant macro predictor. Countries where LGBT groups have more political power have significantly higher baseline support, even after controlling for all individual characteristics.
+
+```{r}
+(mod3.res <- tidy(mod3))
+```
+
+```{r}
+# How much country-level variance is left after adding macro predictors?
+(sigma2_u_mod3 <- mod3.res |>
+  filter(effect == "ran_pars", group == "isocntry") |>
+  pull(estimate) |>
+  (\(x) x^2)())
+
+(sigma2_i_mod3 <- (pi^2) / 3)
+
+# VPC - compare with mod1 and mod2
+(sigma2_u_mod3 / (sigma2_u_mod3 + sigma2_i_mod3))
+```
+
+After adding macro-level predictors, VPC dropped from 0.18 to 0.09. This means that particularly LGBT power explains a substantial portion of th remaining variation between countries.
+
+The VPC progresses from 0.3 in the null model, 0.18 after adding individual characteristics of the populations, and 0.09 after adding macro variables. However, 9% still remains unexplained.
+
+## Examining Country Random Effects
+
+```{r}
+# Extract random effect for each country (u_j): 
+# deviation from the population-level intercept
+country.effects <- ranef(mod3)$isocntry |>
+  as_tibble(rownames = "isocntry") |>
+  rename(u_j = `(Intercept)`)
+
+country.effects
+```
+
+```{r}
+# Get the fixed intercept from mod3
+(fixed_int <- mod3.res |>
+  filter(effect == "fixed", term == "(Intercept)") |>
+  pull(estimate))
+```
+
+```{r}
+# Add fixed intercept to each country's random effect
+# to get each country's estimated baseline log-odds of LGBT support
+country.effects <- country.effects |>
+  mutate(ran.int = fixed_int + u_j)
+
+country.effects
+
+```
+
+```{r}
+# Countries with highest baseline support (after controlling for all predictors)
+country.effects |> arrange(desc(ran.int))
+
+# Countries with lowest baseline support
+country.effects |> arrange(ran.int)
+```
+
+Spain has the highest baseline log-odds of LGBT support, deviating 1.29 units above the population average (the strongest deviation in the sample). Followed by Sweden with a deviation of 1.19, and the Portugal with 1.73.
+
+Slovakia shows the strongest negative deviation (-1.10), with the lowest baseline log-odds of LGBT support in the sample. Followed by Estonia with a deviation of -0.73, and Czech Republic with -0.65.
+
+```{r}
+# Join with macro-level variables for visualization
+country.effects <- country.effects |>
+  left_join(
+    merged_data_dummy |>
+      dplyr::select(isocntry, lgbt_power, free_expr, hate_speech, gdp_pc) |>
+      distinct(),
+    by = "isocntry"
+  )
+country.effects
+
+# Distribution of country random intercepts
+ggplot(country.effects, aes(x = reorder(isocntry, ran.int), y = ran.int)) +
+  geom_point() +
+  geom_hline(yintercept = fixed_int, linetype = "dashed", color = "red") +
+  coord_flip() +
+  labs(
+    title = "Country-level random intercepts",
+    subtitle = "Red line = population-level intercept",
+    x = "Country", y = "Estimated baseline log-odds of LGBT support"
+  ) +
+  theme_bw()
+```
+
+The plot shows all 28 countries ranked by their estimated baseline of LGBT support after controlling for all individual an macro-level predictors. The red line represents the population average. The spread of the dots tells you how much residual country-level variation remains after all predictors are accounted for.
+
+```{r}
+saveRDS(mod_null, "mod_null.rds")
+saveRDS(mod2,     "mod2.rds")
+saveRDS(mod3,     "mod3.rds")
+```
+
+
+## Predicted Probability of LGBT support by LGBT politcal power
+
+```{r}
+# Predicted probabilities by lgbt_power
+ggpredict(mod3, terms = "lgbt_power [all]") |>
+  plot() +
+  labs(
+    title = "Predicted probability of LGBT support by LGBT political power",
+    x = "LGBT Political Power",
+    y = "Predicted probability of support"
+  ) +
+  theme_bw()
+```
+
+The plot shows that as LGBT political power increases, the predicted probability of LGBT support increases consistently. Therefore, this confirms that the political empowerment of LGBT groups is not only statistically significant but substantively meaningful. At the highest levels of LGBT political power, predicted support exceeds 85%, suggesting that institutional representation plays a crucial role in shaping public attitudes toward LGBT rights across European countries.
+
+## Predicted probability of LGBT support by LGBT friends, conditioned on LGBT political power
+
+```{r}
+ggpredict(mod3, terms = c("lgbt_friends", "lgbt_power [meansd]")) |> plot()
+```
+
+We can see that having LGBT friends has a positive impact on supporting their rights. Also, we can see that by conditioning by LGBT power the effect is consistent (they all have the same slope). The contact hypothesis operates equally regardless of the country context. However, the vertical separation between the lines confirms that LGBT political power has an independent country-level effect, with individuals in high political power countries consistently showing higher predicted support at every level of LGBT friends.
+
+```{r}
+ggpredict(mod3, terms = c("gender", "lgbt_power [meansd]")) |> plot()
+```
+
+
+```{r}
+write_csv(merged_data_dummy, file = "merged_data_dummy.csv")
+```
+
+# Conclusions 
+The central idea that motivated our investigation was to understand why 9 EU countries declined their support towards LGBT+ people between 2015 and 2019, against the general trend of rising acceptance. Nevertheless, there is not a single answer.
+
+The three hierarchical models show a progressive decomposition of variance. The null model showed that 30% of total variation of the acceptance rate is attributable to country-level differences, which justifies the multilevel framework. After adding the individual-level predictors in Model 2, the variation was compressed to 18%, showing that part of the national divergence was compositional: predictors such as having LGBT+ friends, religion and education have an impact. Model 3 reduced it further to 9%, but based mostly in only one predictor. Of the six country-level variables selected from V-Dem, only LGBT political power reached significance. Whereas variables like GDP per capita, freedom of expression, polarization and educational equality did not have an impact when controlling by individual composition. Based on this evidence, what seems to matter the most for the acceptance is whether LGBT groups hold institutionalized political voice. 
+
+The nine countries do not follow a coherence. Denmark and Ireland are above the EU mean in the final model's random intercepts, suggesting that their respective decline in support may be driven by country-specific factors outside the ones already studied. Hungary, Bulgaria, Croatia, Slovakia and Czech Republic show persistently negative intercepts that survive controls. This means that our model could not capture the reason why these countries have lower support. This is probably related to dynamics not possible to analyze such as mobilizations against LGBT rights or the impact of religious organizations beyond the religion itself. Italy is in an intermediate position, closer to the EU mean, while Malta has a puzzling case. It has a really high baseline intercept in the per-country models,inconsistent with the fact their support decreased. 
+
+One finding that stands out across all nine countries is the role of interpersonal contact. Having LGBT+ friends is the strongest individual-level predictor in both Model 2 and Model 3, and the interaction plot shows that its effect does not vary with LGBT political power — meaning that contact and institutional representation work independently and accumulate. In countries where both are low, individuals are less likely to know LGBT+ people and less likely to live in contexts where LGBT+ identities are politically visible. This double disadvantage may help explain not only why decline is concentrated where it is, but also why it can become self-reinforcing over time.
