@@ -1,0 +1,23 @@
+# R
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Model outputs
+*.rds
+
+# Quarto
+/.quarto/
+*_files/
+*_cache/
+*.html
+
+# Raw data (not redistributed, use merged_data_dummy.csv)
+data.csv
+merged_data.csv
+
+# OS
+.DS_Store
+Thumbs.db
